@@ -1,0 +1,105 @@
+name: mastolens
+
+services:
+  app:
+    container_name: mastolens-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - ALLOW_FRESH_MIGRATE=true
+    volumes:
+      - ./docker/data/storage:/var/www/html/storage
+    entrypoint: /usr/local/bin/entrypoint.sh
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mastolens
+
+  web:
+    container_name: mastolens-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+      - "${SSL_PORT:-8443}:443"
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN:-localhost}
+      - SSL_ENABLED=${SSL_ENABLED:-false}
+      - SSL_CERT_PATH=${SSL_CERT_PATH:-/etc/nginx/ssl/cert.pem}
+      - SSL_KEY_PATH=${SSL_KEY_PATH:-/etc/nginx/ssl/key.pem}
+    volumes:
+      - ./docker/data/storage/app/public:/var/www/html/public/storage:ro
+      # Mount SSL certs directory if using SSL (create docker/ssl/ and place certs there)
+      # - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - mastolens
+
+  db:
+    container_name: mastolens-db
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
+      MARIADB_DATABASE: "${DB_DATABASE:-mastolens}"
+      MARIADB_USER: "${DB_USERNAME:-mastolens}"
+      MARIADB_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - ./docker/data/mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - mastolens
+
+  worker:
+    container_name: mastolens-worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./docker/data/storage:/var/www/html/storage
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mastolens
+
+  scheduler:
+    container_name: mastolens-scheduler
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    user: root
+    volumes:
+      - ./docker/data/storage:/var/www/html/storage
+      - ./docker/scheduler/crontab:/etc/crontabs/www-data:ro
+    command: crond -f -l 8
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mastolens
+
+networks:
+  mastolens:
+    driver: bridge

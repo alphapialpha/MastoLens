@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+[x-cloak] { display: none !important; }
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* MastoLens brand palette */
+    --color-brand-dark: #701936;   /* dark pink/violet — primary actions, "Masto" text */
+    --color-brand-deep: #5a1230;   /* deeper shade — hover states */
+    --color-brand-pink: #ed507f;   /* light pink — accents, rings, soft backgrounds */
+    --color-brand-grey: #534d4d;   /* dark grey — "Lens" text, neutral secondary */
+}
