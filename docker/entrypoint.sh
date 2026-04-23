@@ -1,13 +1,14 @@
 #!/bin/sh
 set -e
 
-# Ensure required writable paths exist on bind-mounted storage.
+# Ensure required writable paths exist on bind-mounted storage and fix ownership.
 mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/framework/testing
 mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Safety check: refuse to run all migrations on a DB that already had data
 # This prevents silent data loss if the volume is accidentally wiped

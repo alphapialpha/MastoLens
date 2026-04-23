@@ -93,7 +93,7 @@ services:
     volumes:
       - ./docker/data/storage:/var/www/html/storage
       - ./docker/scheduler/crontab:/etc/crontabs/www-data:ro
-    command: crond -f -l 8
+    command: sh -c "chown -R www-data:www-data /var/www/html/storage && crond -f -l 8"
     depends_on:
       db:
         condition: service_healthy
