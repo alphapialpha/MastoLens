@@ -14,6 +14,12 @@ services:
     volumes:
       - ./docker/data/storage:/var/www/html/storage
     entrypoint: /usr/local/bin/entrypoint.sh
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
@@ -40,7 +46,8 @@ services:
       # Mount SSL certs directory if using SSL (create docker/ssl/ and place certs there)
       # - ./docker/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - mastolens
 
