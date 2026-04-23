@@ -21,7 +21,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                     <p class="mt-1 text-sm text-gray-500">
-                        Enter a public Mastodon handle, e.g. <code class="text-gray-700">gargron@mastodon.social</code>
+                        Enter a public Mastodon handle, e.g. <code class="text-gray-700">alphapialpha@alphapialpha.social</code>
                     </p>
                 </div>
 
