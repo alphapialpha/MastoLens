@@ -50,11 +50,12 @@
                                     {{ $account->is_active ? 'Pause' : 'Resume' }}
                                 </button>
                             </form>
-                            <form method="POST" action="{{ route('tracked-accounts.destroy', $account) }}"
-                                  onsubmit="return confirm('Remove this tracked account?')">
+                            <form method="POST" action="{{ route('tracked-accounts.destroy', $account) }}" class="remove-account-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700">Remove</button>
+                                <button type="button"
+                                        onclick="openRemoveModal(this.closest('form'), '{{ addslashes($account->display_name ?: $account->username) }}')"
+                                        class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700">Remove</button>
                             </form>
                         </div>
                     </div>
@@ -82,4 +83,53 @@
             @endforeach
         </div>
     @endif
+
+    {{-- Remove account confirmation modal --}}
+    <div id="remove-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/50" onclick="closeRemoveModal()"></div>
+        {{-- Dialog --}}
+        <div class="relative flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+                        <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900">Remove tracked account</h3>
+                        <p class="mt-1 text-sm text-gray-600">Stop tracking <span id="remove-modal-name" class="font-medium text-gray-900"></span>? All collected data for this account will be removed.</p>
+                    </div>
+                </div>
+                <div class="mt-5 flex justify-end gap-3">
+                    <button type="button" onclick="closeRemoveModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                    <button type="button" id="remove-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    let _pendingRemoveForm = null;
+
+    function openRemoveModal(form, name) {
+        _pendingRemoveForm = form;
+        document.getElementById('remove-modal-name').textContent = name;
+        document.getElementById('remove-modal').classList.remove('hidden');
+    }
+
+    function closeRemoveModal() {
+        _pendingRemoveForm = null;
+        document.getElementById('remove-modal').classList.add('hidden');
+    }
+
+    document.getElementById('remove-modal-confirm').addEventListener('click', function () {
+        if (_pendingRemoveForm) _pendingRemoveForm.submit();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeRemoveModal();
+    });
+</script>
+@endpush

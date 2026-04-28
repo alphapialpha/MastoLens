@@ -60,26 +60,40 @@
         </div>
     </nav>
 
+    {{-- Toast notifications --}}
+    @if(session('status') || session('success') || session('error'))
+        <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-3 w-80 pointer-events-none">
+            @if(session('status') || session('success'))
+                <div class="toast pointer-events-auto flex items-start gap-3 bg-white border-l-4 border-green-500 rounded-lg shadow-lg px-4 py-3 transition-all duration-500">
+                    <svg class="mt-0.5 shrink-0 w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <p class="text-sm text-gray-800 flex-1">{{ session('success') ?? session('status') }}</p>
+                    <button onclick="dismissToast(this.closest('.toast'))" class="shrink-0 text-gray-400 hover:text-gray-600 leading-none text-lg">&times;</button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="toast pointer-events-auto flex items-start gap-3 bg-white border-l-4 border-red-500 rounded-lg shadow-lg px-4 py-3 transition-all duration-500">
+                    <svg class="mt-0.5 shrink-0 w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <p class="text-sm text-gray-800 flex-1">{{ session('error') }}</p>
+                    <button onclick="dismissToast(this.closest('.toast'))" class="shrink-0 text-gray-400 hover:text-gray-600 leading-none text-lg">&times;</button>
+                </div>
+            @endif
+        </div>
+        <script>
+            function dismissToast(el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(2rem)';
+                setTimeout(() => el.remove(), 500);
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.toast').forEach(function (toast) {
+                    setTimeout(() => dismissToast(toast), 4000);
+                });
+            });
+        </script>
+    @endif
+
     <main class="flex-1 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if (session('status'))
-                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-                    {{ session('error') }}
-                </div>
-            @endif
-
             @yield('content')
         </div>
     </main>
