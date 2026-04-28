@@ -55,6 +55,7 @@ services:
     container_name: mastolens-db
     image: mariadb:11
     restart: unless-stopped
+    stop_grace_period: 60s
     environment:
       MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
       MARIADB_DATABASE: "${DB_DATABASE:-mastolens}"
@@ -99,8 +100,7 @@ services:
     user: root
     volumes:
       - ./docker/data/storage:/var/www/html/storage
-      - ./docker/scheduler/crontab:/etc/crontabs/www-data
-    command: sh -c "chown -R www-data:www-data /var/www/html/storage && chown root:root /etc/crontabs/www-data && chmod 600 /etc/crontabs/www-data && crond -f -l 8"
+    command: sh -c "chown -R www-data:www-data /var/www/html/storage && crond -f -l 8"
     depends_on:
       db:
         condition: service_healthy

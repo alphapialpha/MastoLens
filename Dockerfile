@@ -49,6 +49,10 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Bake crontab into image so the host file is never mutated at runtime
+COPY docker/scheduler/crontab /etc/crontabs/www-data
+RUN chown root:root /etc/crontabs/www-data && chmod 600 /etc/crontabs/www-data
+
 # PHP-FPM config: listen on port 9000 (default)
 EXPOSE 9000
 
