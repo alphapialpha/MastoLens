@@ -7,171 +7,188 @@
         </a>
     </div>
 
-    {{-- Status header --}}
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex items-center space-x-2 text-xs text-gray-500 mb-3">
-            @if($status->is_boost)
-                <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Boost</span>
-            @endif
-            @if($status->is_reply)
-                <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Reply</span>
-            @endif
-            @if($status->has_media)
-                <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Media</span>
-            @endif
-            @if($status->has_poll)
-                <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded">Poll</span>
-            @endif
-            @if($status->has_card)
-                <span class="bg-teal-100 text-teal-800 px-2 py-0.5 rounded">Link Card</span>
-            @endif
-            @if($status->is_sensitive)
-                <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded">Sensitive</span>
-            @endif
-            <span class="{{ $status->tracking_state === 'active' ? 'text-green-600' : 'text-gray-400' }}">
-                {{ ucfirst($status->tracking_state) }}
-            </span>
-        </div>
+    {{-- Status detail + stats side by side (2/3 + 1/3) --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-        @if($status->is_boost && $status->boost_data_json)
-            <div class="flex items-center space-x-3 mb-4 p-3 bg-blue-50 rounded-lg">
-                @if(!empty($status->boost_data_json['author_avatar']))
-                    <img src="{{ $status->boost_data_json['author_avatar'] }}" alt="" class="w-10 h-10 rounded-full" loading="lazy">
+        {{-- Left: status detail (2/3) --}}
+        <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+            <div class="flex items-center space-x-2 text-xs text-gray-500 mb-3">
+                @if($status->is_boost)
+                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Boost</span>
                 @endif
-                <div>
-                    <div class="text-sm font-medium text-gray-800">
-                        Boosted a post by {{ $status->boost_data_json['author_display_name'] ?? 'unknown' }}
-                    </div>
-                    @if(!empty($status->boost_data_json['author_acct']))
-                        <div class="text-xs text-gray-500">
-                            @if(!empty($status->boost_data_json['author_url']))
-                                <a href="{{ $status->boost_data_json['author_url'] }}" target="_blank" rel="noopener" class="hover:text-brand-dark">
-                                    {{ '@' . $status->boost_data_json['author_acct'] }}
-                                </a>
-                            @else
-                                {{ '@' . $status->boost_data_json['author_acct'] }}
-                            @endif
+                @if($status->is_reply)
+                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Reply</span>
+                @endif
+                @if($status->has_media)
+                    <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Media</span>
+                @endif
+                @if($status->has_poll)
+                    <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded">Poll</span>
+                @endif
+                @if($status->has_card)
+                    <span class="bg-teal-100 text-teal-800 px-2 py-0.5 rounded">Link Card</span>
+                @endif
+                @if($status->is_sensitive)
+                    <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded">Sensitive</span>
+                @endif
+                <span class="{{ $status->tracking_state === 'active' ? 'text-green-600' : 'text-gray-400' }}">
+                    {{ ucfirst($status->tracking_state) }}
+                </span>
+            </div>
+
+            @if($status->is_boost && $status->boost_data_json)
+                <div class="flex items-center space-x-3 mb-4 p-3 bg-blue-50 rounded-lg">
+                    @if(!empty($status->boost_data_json['author_avatar']))
+                        <img src="{{ $status->boost_data_json['author_avatar'] }}" alt="" class="w-10 h-10 rounded-full" loading="lazy">
+                    @endif
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">
+                            Boosted a post by {{ $status->boost_data_json['author_display_name'] ?? 'unknown' }}
                         </div>
+                        @if(!empty($status->boost_data_json['author_acct']))
+                            <div class="text-xs text-gray-500">
+                                @if(!empty($status->boost_data_json['author_url']))
+                                    <a href="{{ $status->boost_data_json['author_url'] }}" target="_blank" rel="noopener" class="hover:text-brand-dark">
+                                        {{ '@' . $status->boost_data_json['author_acct'] }}
+                                    </a>
+                                @else
+                                    {{ '@' . $status->boost_data_json['author_acct'] }}
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                    @if(!empty($status->boost_data_json['original_url']))
+                        <a href="{{ $status->boost_data_json['original_url'] }}" target="_blank" rel="noopener" class="ml-auto text-xs text-brand-dark hover:text-brand-deep">
+                            View original &rarr;
+                        </a>
                     @endif
                 </div>
-                @if(!empty($status->boost_data_json['original_url']))
-                    <a href="{{ $status->boost_data_json['original_url'] }}" target="_blank" rel="noopener" class="ml-auto text-xs text-brand-dark hover:text-brand-deep">
-                        View original &rarr;
+            @endif
+
+            @if($status->spoiler_text)
+                <div class="text-sm font-medium text-amber-700 bg-amber-50 rounded p-2 mb-3">
+                    CW: {{ $status->spoiler_text }}
+                </div>
+            @endif
+
+            <div class="text-gray-800 leading-relaxed">
+                {{ html_entity_decode(strip_tags($status->content_html)) }}
+            </div>
+
+            @if($status->has_media && $status->media_attachments_json)
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    @foreach($status->media_attachments_json as $media)
+                        @if(($media['type'] ?? '') === 'image')
+                            <a href="{{ $media['url'] ?? '' }}" target="_blank" rel="noopener" class="relative block group rounded-lg overflow-hidden">
+                                <img src="{{ $media['preview_url'] ?? $media['url'] ?? '' }}" alt="{{ $media['description'] ?? '' }}" class="w-full object-cover max-h-64" loading="lazy">
+                                @if(!empty($media['description']))
+                                    <div class="absolute inset-0 bg-black/70 text-white text-xs p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 overflow-y-auto leading-relaxed">
+                                        {{ $media['description'] }}
+                                    </div>
+                                @endif
+                            </a>
+                        @elseif(($media['type'] ?? '') === 'video' || ($media['type'] ?? '') === 'gifv')
+                            <video controls preload="metadata" class="w-full rounded-lg max-h-64" poster="{{ $media['preview_url'] ?? '' }}">
+                                <source src="{{ $media['url'] ?? '' }}" type="video/mp4">
+                            </video>
+                        @elseif(($media['type'] ?? '') === 'audio')
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <audio controls preload="metadata" class="w-full">
+                                    <source src="{{ $media['url'] ?? '' }}">
+                                </audio>
+                                @if(!empty($media['description']))
+                                    <p class="text-xs text-gray-500 mt-1">{{ $media['description'] }}</p>
+                                @endif
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+                <div class="flex items-center space-x-4">
+                    <span>{{ $status->created_at_remote?->format('M j, Y g:i A') ?? 'Unknown date' }}</span>
+                    @if($status->language)
+                        <span class="uppercase">{{ $status->language }}</span>
+                    @endif
+                    <span>{{ $status->visibility }}</span>
+                </div>
+                @php
+                    $viewUrl = ($status->is_boost && !empty($status->boost_data_json['original_url']))
+                        ? $status->boost_data_json['original_url']
+                        : $status->status_url;
+                @endphp
+                @if($viewUrl)
+                    <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="text-brand-dark hover:text-brand-deep">
+                        View on Mastodon &rarr;
                     </a>
                 @endif
             </div>
-        @endif
-
-        @if($status->spoiler_text)
-            <div class="text-sm font-medium text-amber-700 bg-amber-50 rounded p-2 mb-3">
-                CW: {{ $status->spoiler_text }}
-            </div>
-        @endif
-
-        <div class="text-gray-800 leading-relaxed">
-            {{ html_entity_decode(strip_tags($status->content_html)) }}
         </div>
 
-        @if($status->has_media && $status->media_attachments_json)
-            <div class="mt-4 grid grid-cols-2 gap-3">
-                @foreach($status->media_attachments_json as $media)
-                    @if(($media['type'] ?? '') === 'image')
-                        <a href="{{ $media['url'] ?? '' }}" target="_blank" rel="noopener" class="block">
-                            <img src="{{ $media['preview_url'] ?? $media['url'] ?? '' }}" alt="{{ $media['description'] ?? '' }}" class="w-full rounded-lg object-cover max-h-64" loading="lazy">
-                            @if(!empty($media['description']))
-                                <p class="text-xs text-gray-500 mt-1">{{ $media['description'] }}</p>
-                            @endif
-                        </a>
-                    @elseif(($media['type'] ?? '') === 'video' || ($media['type'] ?? '') === 'gifv')
-                        <video controls preload="metadata" class="w-full rounded-lg max-h-64" poster="{{ $media['preview_url'] ?? '' }}">
-                            <source src="{{ $media['url'] ?? '' }}" type="video/mp4">
-                        </video>
-                    @elseif(($media['type'] ?? '') === 'audio')
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <audio controls preload="metadata" class="w-full">
-                                <source src="{{ $media['url'] ?? '' }}">
-                            </audio>
-                            @if(!empty($media['description']))
-                                <p class="text-xs text-gray-500 mt-1">{{ $media['description'] }}</p>
-                            @endif
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-        @endif
+        {{-- Right: stats panel (1/3) --}}
+        <div class="lg:col-span-1 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Current Engagement</h2>
 
-        <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
-            <div class="flex items-center space-x-4">
-                <span>{{ $status->created_at_remote?->format('M j, Y g:i A') ?? 'Unknown date' }}</span>
-                @if($status->language)
-                    <span class="uppercase">{{ $status->language }}</span>
-                @endif
-                <span>{{ $status->visibility }}</span>
+            {{-- Current totals --}}
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-yellow-400">
+                    <div class="text-2xl font-bold text-yellow-600">{{ $status->summary?->latest_favourites_count ?? 0 }}</div>
+                    <div class="text-xs text-gray-500">Favourites</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-blue-400">
+                    <div class="text-2xl font-bold text-blue-600">{{ $status->summary?->latest_boosts_count ?? 0 }}</div>
+                    <div class="text-xs text-gray-500">Boosts</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-green-400">
+                    <div class="text-2xl font-bold text-green-600">{{ $status->summary?->latest_replies_count ?? 0 }}</div>
+                    <div class="text-xs text-gray-500">Replies</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-brand-pink">
+                    <div class="text-2xl font-bold text-brand-dark">{{ $status->summary ? $status->summary->latestTotalEngagement() : 0 }}</div>
+                    <div class="text-xs text-gray-500">Total</div>
+                </div>
             </div>
-            @php
-                $viewUrl = ($status->is_boost && !empty($status->boost_data_json['original_url']))
-                    ? $status->boost_data_json['original_url']
-                    : $status->status_url;
-            @endphp
-            @if($viewUrl)
-                <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="text-brand-dark hover:text-brand-deep">
-                    View on Mastodon &rarr;
-                </a>
+
+            {{-- Milestones --}}
+            @if($status->summary && ($status->summary->engagement_after_1h || $status->summary->engagement_after_24h || $status->summary->engagement_after_7d))
+                <div class="border-t border-gray-100 pt-4">
+                    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Milestones</h2>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-gray-300">
+                            <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_1h ?? '—' }}</div>
+                            <div class="text-xs text-gray-500">After 1h</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-gray-300">
+                            <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_24h ?? '—' }}</div>
+                            <div class="text-xs text-gray-500">After 24h</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-gray-300">
+                            <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_7d ?? '—' }}</div>
+                            <div class="text-xs text-gray-500">After 7d</div>
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
-    </div>
 
-    {{-- Current totals --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-            <div class="text-2xl font-bold text-yellow-600">{{ $status->summary?->latest_favourites_count ?? 0 }}</div>
-            <div class="text-xs text-gray-500">Favourites</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-            <div class="text-2xl font-bold text-blue-600">{{ $status->summary?->latest_boosts_count ?? 0 }}</div>
-            <div class="text-xs text-gray-500">Boosts</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-            <div class="text-2xl font-bold text-green-600">{{ $status->summary?->latest_replies_count ?? 0 }}</div>
-            <div class="text-xs text-gray-500">Replies</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-            <div class="text-2xl font-bold text-brand-dark">{{ $status->summary ? $status->summary->latestTotalEngagement() : 0 }}</div>
-            <div class="text-xs text-gray-500">Total Engagement</div>
-        </div>
-    </div>
+    </div>{{-- end 2/3 + 1/3 grid --}}
 
-    {{-- Milestone engagement --}}
-    @if($status->summary && ($status->summary->engagement_after_1h || $status->summary->engagement_after_24h || $status->summary->engagement_after_7d))
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_1h ?? '—' }}</div>
-                <div class="text-xs text-gray-500">After 1 Hour</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_24h ?? '—' }}</div>
-                <div class="text-xs text-gray-500">After 24 Hours</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-xl font-bold text-gray-700">{{ $status->summary->engagement_after_7d ?? '—' }}</div>
-                <div class="text-xs text-gray-500">After 7 Days</div>
-            </div>
-        </div>
-    @endif
-
-    {{-- Engagement timeline chart --}}
+    {{-- Engagement charts --}}
     @if($status->metricSnapshots->count() > 0)
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Engagement Over Time</h2>
-            <div style="position: relative; height: 300px;">
-                <canvas id="engagementChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">Engagement Over Time</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="engagementChart"></canvas>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Engagement Breakdown</h2>
-            <div style="position: relative; height: 300px;">
-                <canvas id="breakdownChart"></canvas>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">Engagement Breakdown</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="breakdownChart"></canvas>
+                </div>
             </div>
         </div>
     @endif
@@ -278,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
                 fill: true,
-                tension: 0.3,
+                tension: 0,
                 pointRadius: 4,
                 pointHoverRadius: 6,
             }]
@@ -307,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: snapshots.map(s => s.favourites),
                     borderColor: 'rgb(234, 179, 8)',
                     backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                    tension: 0.3,
+                    tension: 0,
                     pointRadius: 3,
                 },
                 {
@@ -315,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: snapshots.map(s => s.boosts),
                     borderColor: 'rgb(59, 130, 246)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.3,
+                    tension: 0,
                     pointRadius: 3,
                 },
                 {
@@ -323,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: snapshots.map(s => s.replies),
                     borderColor: 'rgb(34, 197, 94)',
                     backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    tension: 0.3,
+                    tension: 0,
                     pointRadius: 3,
                 }
             ]

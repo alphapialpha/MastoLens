@@ -83,6 +83,40 @@ Over the entire lifetime of tracking, only **14 API calls** are made per post.
 
 ---
 
+## Error Handling & Failover
+
+### a) Instance unreachable (account sync)
+
+Every 5 minutes, MastoLens attempts to sync the latest statuses for each active tracked account. If the remote Mastodon instance is unreachable, times out, or returns a server error:
+
+- The queue job retries **3 times**, with a **30-second backoff** between each attempt
+- After all 3 attempts fail, the job lands in the `failed_jobs` table and `last_sync_status` is set to `error` on the account
+- The account is **not deactivated** — the scheduler fires a fresh sync job again in 5 minutes regardless
+- Once the instance recovers, syncing resumes automatically with no manual intervention
+
+### b) Single post fetch fails (metric snapshot)
+
+Every minute, MastoLens checks for posts that have a snapshot due. If the API call for a specific post fails:
+
+**Post deleted (HTTP 404 or 410):**
+- The post's `tracking_state` is immediately set to `failed`
+- `next_snapshot_due_at` is cleared — no further API calls are ever made for that post
+- All previously captured snapshots remain visible in the UI
+
+**Transient error (instance down, timeout, 5xx):**
+- The job does **not** throw or consume a retry — it simply reschedules by setting `next_snapshot_due_at = now() + 5 minutes`
+- The post will be retried on the next scheduler tick, indefinitely, until the instance recovers or returns a 404/410
+
+### Summary
+
+| Scenario | Retry mechanism | Gives up? |
+|---|---|---|
+| Instance unreachable (account sync) | Queue: 3 attempts, 30s apart; fresh job every 5 min | No — resumes automatically when instance recovers |
+| Instance unreachable (snapshot) | Self-reschedules +5 min via database | No — retries indefinitely |
+| Post deleted (404/410) | None | Yes — immediately marked `failed`, no further calls |
+
+---
+
 ## Deployment Guide
 
 ### Prerequisites

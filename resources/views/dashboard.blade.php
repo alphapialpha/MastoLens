@@ -6,19 +6,19 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-400">
             <div class="text-sm font-medium text-gray-500">Tracked Accounts</div>
             <div class="mt-1 text-3xl font-bold text-gray-900">{{ $accountCount }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-400">
             <div class="text-sm font-medium text-gray-500">Active Accounts</div>
             <div class="mt-1 text-3xl font-bold text-gray-900">{{ $activeCount }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-400">
             <div class="text-sm font-medium text-gray-500">Tracked Statuses</div>
             <div class="mt-1 text-3xl font-bold text-gray-900">{{ $statusCount }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-400">
             <div class="text-sm font-medium text-gray-500">Failed Posts</div>
             <div class="mt-1 text-3xl font-bold {{ $failedCount > 0 ? 'text-red-600' : 'text-gray-900' }}">{{ $failedCount }}</div>
         </div>
