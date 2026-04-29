@@ -211,8 +211,8 @@ When a new version is available, pull the code and rebuild. The steps are always
 # 1. Pull the latest code
 git pull
 
-# 2. Rebuild the app and web containers (picks up code changes, new dependencies, asset changes)
-docker compose build app web
+# 2. Rebuild ALL containers that run app code
+docker compose build app web worker scheduler
 
 # 3. Restart ALL containers to ensure the new image is actually running
 docker compose down && docker compose up -d
@@ -221,24 +221,15 @@ docker compose down && docker compose up -d
 docker compose exec app php artisan migrate --force
 ```
 
+> **Why build all four?** `app`, `web`, `worker`, and `scheduler` all use the same Dockerfile but are separate build entries in `docker-compose.yml`. Building only `app web` leaves the worker and scheduler running old code — which means background jobs (snapshots, syncs) won't pick up any fixes deployed in the update.
+
 > **Why `down` + `up -d` instead of `up -d app web`?** Docker only recreates a container if it detects the image hash has changed. Due to layer caching, the hash sometimes stays the same even after a rebuild — meaning `up -d app web` leaves the old container running with the old files inside. `down` removes all containers unconditionally, and `up -d` then starts fresh containers from the updated images. The brief downtime is worth the certainty.
 
 > **Why `--force`?** When `APP_ENV=production`, Laravel requires this flag to skip the interactive confirmation prompt. Without it, the command hangs inside the non-interactive Docker exec session. It does **not** perform any destructive action — it only runs pending migrations that add new columns or tables.
 
-> **Why rebuild `app` and `web` together?** PHP files, Blade templates, and compiled frontend assets (JS/CSS) are all copied into the image at build time — they are not mounted as volumes. `web` serves the compiled Vite assets from the `app` build stage, so they must be rebuilt together to keep asset hashes in sync.
-
 ### If no migrations are included in the update
 
 You can skip step 4. The release notes will mention if a migration is required.
-
-### Full update (all containers)
-
-```bash
-git pull
-docker compose build app web
-docker compose down && docker compose up -d
-docker compose exec app php artisan migrate --force
-```
 
 ---
 
