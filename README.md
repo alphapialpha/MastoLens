@@ -214,12 +214,14 @@ git pull
 # 2. Rebuild the app and web containers (picks up code changes, new dependencies, asset changes)
 docker compose build app web
 
-# 3. Restart the rebuilt containers
-docker compose up -d app web
+# 3. Restart ALL containers to ensure the new image is actually running
+docker compose down && docker compose up -d
 
 # 4. Run any new database migrations
 docker compose exec app php artisan migrate --force
 ```
+
+> **Why `down` + `up -d` instead of `up -d app web`?** Docker only recreates a container if it detects the image hash has changed. Due to layer caching, the hash sometimes stays the same even after a rebuild — meaning `up -d app web` leaves the old container running with the old files inside. `down` removes all containers unconditionally, and `up -d` then starts fresh containers from the updated images. The brief downtime is worth the certainty.
 
 > **Why `--force`?** When `APP_ENV=production`, Laravel requires this flag to skip the interactive confirmation prompt. Without it, the command hangs inside the non-interactive Docker exec session. It does **not** perform any destructive action — it only runs pending migrations that add new columns or tables.
 
@@ -229,26 +231,14 @@ docker compose exec app php artisan migrate --force
 
 You can skip step 4. The release notes will mention if a migration is required.
 
-### Updating the worker and scheduler
-
-The `worker` and `scheduler` containers also run code from the `app` image. If a release changes job or command logic, restart them too:
-
-```bash
-docker compose up -d worker scheduler
-```
-
-This is safe to do alongside every update — it's a no-op if the image hasn't changed.
-
 ### Full update (all containers)
 
 ```bash
 git pull
 docker compose build app web
-docker compose up -d
+docker compose down && docker compose up -d
 docker compose exec app php artisan migrate --force
 ```
-
-`docker compose up -d` (without specifying containers) restarts any container whose image has changed and leaves the rest untouched.
 
 ---
 
