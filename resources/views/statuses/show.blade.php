@@ -25,6 +25,9 @@
                 @if($status->has_poll)
                     <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded">Poll</span>
                 @endif
+                @if($status->is_quote)
+                    <span class="bg-violet-100 text-violet-800 px-2 py-0.5 rounded">Quote</span>
+                @endif
                 @if($status->has_card)
                     <span class="bg-teal-100 text-teal-800 px-2 py-0.5 rounded">Link Card</span>
                 @endif
@@ -144,7 +147,11 @@
                     <div class="text-2xl font-bold text-green-600">{{ $status->summary?->latest_replies_count ?? 0 }}</div>
                     <div class="text-xs text-gray-500">Replies</div>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-brand-pink">
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-purple-400">
+                    <div class="text-2xl font-bold text-purple-600">{{ $status->summary?->latest_quotes_count ?? 0 }}</div>
+                    <div class="text-xs text-gray-500">Quotes</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center border-l-4 border-brand-pink col-span-2">
                     <div class="text-2xl font-bold text-brand-dark">{{ $status->summary ? $status->summary->latestTotalEngagement() : 0 }}</div>
                     <div class="text-xs text-gray-500">Total</div>
                 </div>
@@ -205,6 +212,7 @@
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Favs</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Boosts</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Replies</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quotes</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 </tr>
             </thead>
@@ -218,6 +226,7 @@
                     <td class="px-6 py-3 text-sm text-right text-gray-400">0</td>
                     <td class="px-6 py-3 text-sm text-right text-gray-400">0</td>
                     <td class="px-6 py-3 text-sm text-right text-gray-400">0</td>
+                    <td class="px-6 py-3 text-sm text-right text-gray-400">0</td>
                 </tr>
                 @forelse($status->metricSnapshots as $snap)
                     <tr>
@@ -227,11 +236,12 @@
                         <td class="px-6 py-3 text-sm text-right text-yellow-600">{{ $snap->favourites_count }}</td>
                         <td class="px-6 py-3 text-sm text-right text-blue-600">{{ $snap->boosts_count }}</td>
                         <td class="px-6 py-3 text-sm text-right text-green-600">{{ $snap->replies_count }}</td>
+                        <td class="px-6 py-3 text-sm text-right text-purple-600">{{ $snap->quotes_count }}</td>
                         <td class="px-6 py-3 text-sm text-right font-medium text-gray-900">{{ $snap->totalEngagement() }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-sm text-gray-500">No snapshots captured yet.</td>
+                        <td colspan="8" class="px-6 py-4 text-sm text-gray-500">No snapshots captured yet.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -340,6 +350,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: snapshots.map(s => s.replies),
                     borderColor: 'rgb(34, 197, 94)',
                     backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0,
+                    pointRadius: 3,
+                },
+                {
+                    label: 'Quotes',
+                    data: snapshots.map(s => s.quotes),
+                    borderColor: 'rgb(168, 85, 247)',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
                     tension: 0,
                     pointRadius: 3,
                 }

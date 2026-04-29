@@ -201,6 +201,57 @@ Register a new account, log in, and start tracking Mastodon accounts.
 
 ---
 
+## Applying Updates
+
+When a new version is available, pull the code and rebuild. The steps are always the same regardless of environment.
+
+### Standard update
+
+```bash
+# 1. Pull the latest code
+git pull
+
+# 2. Rebuild the app and web containers (picks up code changes, new dependencies, asset changes)
+docker compose build app web
+
+# 3. Restart the rebuilt containers
+docker compose up -d app web
+
+# 4. Run any new database migrations
+docker compose exec app php artisan migrate --force
+```
+
+> **Why `--force`?** When `APP_ENV=production`, Laravel requires this flag to skip the interactive confirmation prompt. Without it, the command hangs inside the non-interactive Docker exec session. It does **not** perform any destructive action — it only runs pending migrations that add new columns or tables.
+
+> **Why rebuild `app` and `web` together?** PHP files, Blade templates, and compiled frontend assets (JS/CSS) are all copied into the image at build time — they are not mounted as volumes. `web` serves the compiled Vite assets from the `app` build stage, so they must be rebuilt together to keep asset hashes in sync.
+
+### If no migrations are included in the update
+
+You can skip step 4. The release notes will mention if a migration is required.
+
+### Updating the worker and scheduler
+
+The `worker` and `scheduler` containers also run code from the `app` image. If a release changes job or command logic, restart them too:
+
+```bash
+docker compose up -d worker scheduler
+```
+
+This is safe to do alongside every update — it's a no-op if the image hasn't changed.
+
+### Full update (all containers)
+
+```bash
+git pull
+docker compose build app web
+docker compose up -d
+docker compose exec app php artisan migrate --force
+```
+
+`docker compose up -d` (without specifying containers) restarts any container whose image has changed and leaves the rest untouched.
+
+---
+
 ## Environment Variables
 
 ### Essential

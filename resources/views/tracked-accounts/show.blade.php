@@ -67,7 +67,7 @@
         </div>
 
         {{-- Account-level summary stats --}}
-        <div class="mt-4 grid grid-cols-3 md:grid-cols-7 gap-4">
+        <div class="mt-4 grid grid-cols-4 md:grid-cols-8 gap-4">
             <div class="bg-brand-pink/10 rounded-lg p-3 text-center">
                 <div class="text-lg font-bold text-brand-dark">{{ $accountStats['active'] }}</div>
                 <div class="text-xs text-brand-pink">Active</div>
@@ -93,8 +93,12 @@
                 <div class="text-xs text-green-600">Avg 💬</div>
             </div>
             <div class="bg-purple-50 rounded-lg p-3 text-center">
-                <div class="text-lg font-bold text-purple-700">{{ round($accountStats['avg_favourites'] + $accountStats['avg_boosts'] + $accountStats['avg_replies'], 1) }}</div>
-                <div class="text-xs text-purple-600">Avg Total</div>
+                <div class="text-lg font-bold text-purple-700">{{ $accountStats['avg_quotes'] }}</div>
+                <div class="text-xs text-purple-600">Avg ❝</div>
+            </div>
+            <div class="bg-gray-100 rounded-lg p-3 text-center">
+                <div class="text-lg font-bold text-gray-700">{{ round($accountStats['avg_favourites'] + $accountStats['avg_boosts'] + $accountStats['avg_replies'] + $accountStats['avg_quotes'], 1) }}</div>
+                <div class="text-xs text-gray-500">Avg Total</div>
             </div>
         </div>
 
@@ -140,6 +144,7 @@
                                     <div class="flex items-center space-x-2 mb-1">
                                         @if($failed->is_boost)<span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">Boost</span>@endif
                                         @if($failed->is_reply)<span class="bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded text-xs">Reply</span>@endif
+                                        @if($failed->is_quote)<span class="bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded text-xs">Quote</span>@endif
                                     </div>
                                     <a href="{{ route('statuses.show', $failed) }}" class="text-sm text-gray-700 hover:text-brand-dark line-clamp-1">
                                         {{ Str::limit(strip_tags($failed->content_html), 70) ?: '(no text content)' }}
@@ -153,10 +158,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     @if($failed->summary)
-                                        <div class="text-xs">
-                                            ⭐{{ $failed->summary->latest_favourites_count }}
-                                            🔁{{ $failed->summary->latest_boosts_count }}
-                                            💬{{ $failed->summary->latest_replies_count }}
+                                        <div class="text-xs flex gap-2">
+                                            <span>⭐ {{ $failed->summary->latest_favourites_count }}</span>
+                                            <span>🔁 {{ $failed->summary->latest_boosts_count }}</span>
+                                            <span>💬 {{ $failed->summary->latest_replies_count }}</span>
+                                            <span>❝ {{ $failed->summary->latest_quotes_count }}</span>
                                         </div>
                                     @else
                                         —
@@ -207,10 +213,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="text-sm font-semibold text-gray-900">{{ number_format($top->summary->latestTotalEngagement()) }}</div>
-                                    <div class="text-xs text-gray-400">
-                                        ⭐{{ $top->summary->latest_favourites_count }}
-                                        🔁{{ $top->summary->latest_boosts_count }}
-                                        💬{{ $top->summary->latest_replies_count }}
+                                    <div class="text-xs text-gray-400 flex gap-2 justify-end">
+                                        <span>⭐ {{ $top->summary->latest_favourites_count }}</span>
+                                        <span>🔁 {{ $top->summary->latest_boosts_count }}</span>
+                                        <span>💬 {{ $top->summary->latest_replies_count }}</span>
+                                        <span>❝ {{ $top->summary->latest_quotes_count }}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -266,6 +273,7 @@
                     $filters = [
                         'all' => 'All',
                         'originals' => 'Originals',
+                        'quotes' => 'Quotes',
                         'replies' => 'Replies',
                         'boosts' => 'Boosts',
                         'media' => 'Media',
@@ -307,6 +315,9 @@
                         @if($status->is_reply)
                             <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Reply</span>
                         @endif
+                        @if($status->is_quote)
+                            <span class="bg-violet-100 text-violet-800 px-2 py-0.5 rounded">Quote</span>
+                        @endif
                         @if($status->has_media)
                             <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Media</span>
                         @endif
@@ -344,6 +355,7 @@
                         <span>⭐ {{ $status->summary?->latest_favourites_count ?? 0 }}</span>
                         <span>🔁 {{ $status->summary?->latest_boosts_count ?? 0 }}</span>
                         <span>💬 {{ $status->summary?->latest_replies_count ?? 0 }}</span>
+                        <span>❝ {{ $status->summary?->latest_quotes_count ?? 0 }}</span>
                         @if($status->summary)
                             <span class="font-medium text-gray-700">{{ $status->summary->latestTotalEngagement() }} total</span>
                             @if($status->summary->snapshot_count > 1)

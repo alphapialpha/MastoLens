@@ -100,7 +100,7 @@ class CaptureStatusSnapshotJob implements ShouldQueue, ShouldBeUnique
         $favourites = $statusData['favourites_count'] ?? 0;
         $boosts = $statusData['reblogs_count'] ?? 0;
         $replies = $statusData['replies_count'] ?? 0;
-        $quotes = 0;
+        $quotes = $statusData['quotes_count'] ?? 0;
 
         if (!$alreadyCaptured) {
             $status->metricSnapshots()->create([

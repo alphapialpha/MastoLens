@@ -202,6 +202,7 @@ class SyncTrackedAccountStatusesJob implements ShouldQueue, ShouldBeUnique
             'is_sensitive' => $contentSource['sensitive'] ?? false,
             'is_reply' => !empty($data['in_reply_to_id']),
             'is_boost' => $isBoost,
+            'is_quote' => !empty($data['quote']),
             'has_media' => !empty($contentSource['media_attachments']),
             'has_poll' => !empty($contentSource['poll']),
             'has_card' => !empty($contentSource['card']),
@@ -257,6 +258,7 @@ class SyncTrackedAccountStatusesJob implements ShouldQueue, ShouldBeUnique
         $favourites = $data['favourites_count'] ?? 0;
         $boosts = $data['reblogs_count'] ?? 0;
         $replies = $data['replies_count'] ?? 0;
+        $quotes = $data['quotes_count'] ?? 0;
 
         $status->metricSnapshots()->create([
             'captured_at' => now(),
@@ -265,10 +267,10 @@ class SyncTrackedAccountStatusesJob implements ShouldQueue, ShouldBeUnique
             'favourites_count' => $favourites,
             'boosts_count' => $boosts,
             'replies_count' => $replies,
-            'quotes_count' => 0,
+            'quotes_count' => $quotes,
         ]);
 
-        $totalEngagement = $favourites + $boosts + $replies;
+        $totalEngagement = $favourites + $boosts + $replies + $quotes;
 
         $status->summary()->updateOrCreate(
             ['status_id' => $status->id],
@@ -277,7 +279,7 @@ class SyncTrackedAccountStatusesJob implements ShouldQueue, ShouldBeUnique
                 'latest_favourites_count' => $favourites,
                 'latest_boosts_count' => $boosts,
                 'latest_replies_count' => $replies,
-                'latest_quotes_count' => 0,
+                'latest_quotes_count' => $quotes,
                 'snapshot_count' => 1,
                 'first_seen_at' => now(),
                 'last_seen_at' => now(),

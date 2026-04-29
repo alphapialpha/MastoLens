@@ -24,6 +24,7 @@ class StatusController extends Controller
             'favourites' => 0,
             'boosts' => 0,
             'replies' => 0,
+            'quotes' => 0,
             'total' => 0,
         ]])->concat($status->metricSnapshots->map(function ($snap) {
             $mins = $snap->snapshot_target_age_minutes;
@@ -42,6 +43,7 @@ class StatusController extends Controller
                 'favourites' => $snap->favourites_count,
                 'boosts' => $snap->boosts_count,
                 'replies' => $snap->replies_count,
+                'quotes' => $snap->quotes_count,
                 'total' => $snap->totalEngagement(),
             ];
         })->values())->values();

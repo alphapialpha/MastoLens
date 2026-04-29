@@ -103,6 +103,7 @@ class TrackedAccountController extends Controller
 
         $statusQuery = match ($filter) {
             'originals' => $statusQuery->where('is_boost', false)->where('is_reply', false),
+            'quotes' => $statusQuery->where('is_quote', true),
             'replies' => $statusQuery->where('is_reply', true),
             'boosts' => $statusQuery->where('is_boost', true),
             'media' => $statusQuery->where('has_media', true),
@@ -129,6 +130,9 @@ class TrackedAccountController extends Controller
                 : 0,
             'avg_replies' => $originalsWithSummary->count() > 0
                 ? round($originalsWithSummary->avg(fn ($s) => $s->summary->latest_replies_count), 1)
+                : 0,
+            'avg_quotes' => $originalsWithSummary->count() > 0
+                ? round($originalsWithSummary->avg(fn ($s) => $s->summary->latest_quotes_count), 1)
                 : 0,
         ];
 
@@ -177,13 +181,14 @@ class TrackedAccountController extends Controller
 
         $statusQuery = match ($filter) {
             'originals' => $statusQuery->where('is_boost', false)->where('is_reply', false),
+            'quotes' => $statusQuery->where('is_quote', true),
             'replies' => $statusQuery->where('is_reply', true),
             'boosts' => $statusQuery->where('is_boost', true),
             'media' => $statusQuery->where('has_media', true),
             default => $statusQuery,
         };
 
-        $statuses = $statusQuery->paginate(10);
+        $statuses = $statusQuery->paginate(12);
 
         // Group by month for display
         $groupedStatuses = $statuses->getCollection()->groupBy(fn ($s) => $s->created_at_remote?->format('F Y') ?? 'Unknown');
