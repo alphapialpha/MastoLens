@@ -54,8 +54,8 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="button"
-                                        onclick="openRemoveModal(this.closest('form'), '{{ addslashes($account->display_name ?: $account->username) }}')"
-                                        class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700">Remove</button>
+                                        class="js-remove-account inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                                        data-account-name="{{ $account->display_name ?: $account->username }}">Remove</button>
                             </form>
                         </div>
                     </div>
@@ -123,6 +123,12 @@
         _pendingRemoveForm = null;
         document.getElementById('remove-modal').classList.add('hidden');
     }
+
+    document.querySelectorAll('.js-remove-account').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openRemoveModal(btn.closest('form'), btn.dataset.accountName);
+        });
+    });
 
     document.getElementById('remove-modal-confirm').addEventListener('click', function () {
         if (_pendingRemoveForm) _pendingRemoveForm.submit();

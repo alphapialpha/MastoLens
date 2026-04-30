@@ -43,7 +43,7 @@
 
         @if($trackedAccount->note_html)
             <div class="mt-4 text-sm text-gray-600">
-                {{ strip_tags($trackedAccount->note_html) }}
+                {{ html_entity_decode(strip_tags($trackedAccount->note_html), ENT_QUOTES | ENT_HTML5, 'UTF-8') }}
             </div>
         @endif
 
@@ -332,7 +332,7 @@
 
                     {{-- Post text --}}
                     <div class="text-sm text-gray-800 line-clamp-2 flex-1">
-                        {{ html_entity_decode(strip_tags($status->content_html)) }}
+                        {{ html_entity_decode(strip_tags($status->content_html), ENT_QUOTES | ENT_HTML5, 'UTF-8') }}
                     </div>
 
                     {{-- Media thumbnails --}}

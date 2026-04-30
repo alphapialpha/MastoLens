@@ -86,7 +86,7 @@
 
                             {{-- Post text --}}
                             <div class="text-sm text-gray-800 line-clamp-2 flex-1">
-                                {{ html_entity_decode(strip_tags($status->content_html)) }}
+                                {{ html_entity_decode(strip_tags($status->content_html), ENT_QUOTES | ENT_HTML5, 'UTF-8') }}
                             </div>
 
                             {{-- Media thumbnails --}}

@@ -9,8 +9,6 @@ services:
       target: app
     restart: unless-stopped
     env_file: .env
-    environment:
-      - ALLOW_FRESH_MIGRATE=true
     volumes:
       - ./docker/data/storage:/var/www/html/storage
     entrypoint: /usr/local/bin/entrypoint.sh
@@ -97,7 +95,7 @@ services:
       target: app
     restart: unless-stopped
     env_file: .env
-    user: "82:82"
+    user: root
     volumes:
       - ./docker/data/storage:/var/www/html/storage
     command: crond -f -l 8

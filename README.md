@@ -147,6 +147,8 @@ DB_PASSWORD=secret     # Change this for production
 DB_ROOT_PASSWORD=rootsecret  # Change this for production
 ```
 
+> **Fresh install only:** Uncomment `ALLOW_FRESH_MIGRATE=true` in your `.env` before the first `docker compose up`. This tells the entrypoint it is safe to run all migrations on an empty database. Remove or comment it out again after the first successful startup.
+
 ### 3. Start the Application
 
 ```bash
@@ -265,11 +267,12 @@ You can skip step 4. The release notes will mention if a migration is required.
 | `DB_USERNAME` | `mastolens` | Database user |
 | `DB_HOST` | `db` | Database host (the Docker service name) |
 
-### Safety
+### Safety & Networking
 
 | Variable | Default | Description |
 |---|---|---|
-| `ALLOW_FRESH_MIGRATE` | `true` | Safety guard: if the DB appears empty but has many pending migrations, the entrypoint will refuse to run unless this is `true`. Prevents accidental data loss if a volume is wiped. |
+| `ALLOW_FRESH_MIGRATE` | *(unset)* | Set to `true` on first install only to allow migrations on an empty database. Remove after initial setup — keeping it set permanently bypasses the data-loss protection guard. |
+| `TRUSTED_PROXIES` | `172.16.0.0/12,192.168.0.0/16` | CIDRs trusted to set `X-Forwarded-*` headers. The default covers the Docker bridge network. In production behind an external reverse proxy, set this to that proxy's specific IP. |
 
 ---
 
