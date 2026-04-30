@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:22-alpine AS frontend
+FROM node:22-alpine3.22 AS frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -8,7 +8,7 @@ COPY resources ./resources
 RUN npm run build
 
 # Stage 2: Install PHP dependencies
-FROM composer:latest AS vendor
+FROM composer:2.9 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
@@ -16,7 +16,7 @@ COPY . .
 RUN composer dump-autoload --optimize
 
 # Stage 3: Production PHP-FPM image
-FROM php:8.4-fpm-alpine AS app
+FROM php:8.4-fpm-alpine3.22 AS app
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -59,7 +59,7 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # Stage 4: Production Nginx image
-FROM nginx:alpine AS web
+FROM nginx:1.30-alpine3.23 AS web
 
 COPY --from=frontend /app/public/build /var/www/html/public/build
 COPY public/index.php /var/www/html/public/index.php

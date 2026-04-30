@@ -57,10 +57,10 @@ services:
     restart: unless-stopped
     stop_grace_period: 60s
     environment:
-      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
       MARIADB_DATABASE: "${DB_DATABASE:-mastolens}"
       MARIADB_USER: "${DB_USERNAME:-mastolens}"
-      MARIADB_PASSWORD: "${DB_PASSWORD:-secret}"
+      MARIADB_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - ./docker/data/mariadb:/var/lib/mysql
     healthcheck:
@@ -97,10 +97,10 @@ services:
       target: app
     restart: unless-stopped
     env_file: .env
-    user: root
+    user: "82:82"
     volumes:
       - ./docker/data/storage:/var/www/html/storage
-    command: sh -c "chown -R www-data:www-data /var/www/html/storage && crond -f -l 8"
+    command: crond -f -l 8
     depends_on:
       db:
         condition: service_healthy

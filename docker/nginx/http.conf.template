@@ -7,6 +7,11 @@ server {
 
     charset utf-8;
 
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header Referrer-Policy "strict-origin-when-cross-origin";
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()";
+
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
