@@ -35,5 +35,8 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+echo "Clearing stale schedule mutexes..."
+php artisan schedule:clear-cache
+
 echo "Starting PHP-FPM..."
 exec php-fpm
