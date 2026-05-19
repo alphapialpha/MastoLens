@@ -3,19 +3,23 @@
 @section('content')
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold">Tracked Accounts</h1>
+        @if(config('app.account_management_enabled'))
         <a href="{{ route('tracked-accounts.create') }}"
            class="inline-flex items-center px-4 py-2 bg-brand-dark text-white text-sm font-medium rounded-md hover:bg-brand-deep">
             + Add Account
         </a>
+        @endif
     </div>
 
     @if($accounts->isEmpty())
         <div class="bg-white rounded-lg shadow p-8 text-center">
             <p class="text-gray-500 mb-4">No tracked accounts yet.</p>
+            @if(config('app.account_management_enabled'))
             <a href="{{ route('tracked-accounts.create') }}"
                class="inline-flex items-center px-4 py-2 bg-brand-dark text-white text-sm font-medium rounded-md hover:bg-brand-deep">
                 Add Your First Account
             </a>
+            @endif
         </div>
     @else
         <div class="space-y-4">
@@ -50,6 +54,7 @@
                                     {{ $account->is_active ? 'Pause' : 'Resume' }}
                                 </button>
                             </form>
+                            @if(config('app.account_management_enabled'))
                             <form method="POST" action="{{ route('tracked-accounts.destroy', $account) }}" class="remove-account-form">
                                 @csrf
                                 @method('DELETE')
@@ -57,6 +62,7 @@
                                         class="js-remove-account inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
                                         data-account-name="{{ $account->display_name ?: $account->username }}">Remove</button>
                             </form>
+                            @endif
                         </div>
                     </div>
                     <div class="mt-3 grid grid-cols-4 gap-4 text-sm text-gray-500">
@@ -84,6 +90,7 @@
         </div>
     @endif
 
+    @if(config('app.account_management_enabled'))
     {{-- Remove account confirmation modal --}}
     <div id="remove-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         {{-- Backdrop --}}
@@ -107,9 +114,11 @@
             </div>
         </div>
     </div>
+    @endif
 @endsection
 
 @push('scripts')
+@if(config('app.account_management_enabled'))
 <script>
     let _pendingRemoveForm = null;
 
@@ -138,4 +147,5 @@
         if (e.key === 'Escape') closeRemoveModal();
     });
 </script>
+@endif
 @endpush

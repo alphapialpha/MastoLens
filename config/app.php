@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'account_management_enabled' => env('ACCOUNT_MANAGEMENT_ENABLED', true),
+
 ];

@@ -20,11 +20,14 @@ class TrackedAccountController extends Controller
 
     public function create()
     {
+        abort_if(!config('app.account_management_enabled'), 403);
+
         return view('tracked-accounts.create');
     }
 
     public function store(Request $request, WebFingerService $webFinger, MastodonApiService $mastodon)
     {
+        abort_if(!config('app.account_management_enabled'), 403);
         $request->validate([
             'handle' => ['required', 'string', 'max:255', 'regex:/^@?[a-zA-Z0-9_]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,}$/'],
         ]);
@@ -213,6 +216,8 @@ class TrackedAccountController extends Controller
 
     public function destroy(TrackedAccount $trackedAccount)
     {
+        abort_if(!config('app.account_management_enabled'), 403);
+
         if ($trackedAccount->user_id !== auth()->id()) {
             abort(403);
         }

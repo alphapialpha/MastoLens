@@ -247,6 +247,7 @@ You can skip step 4. The release notes will mention if a migration is required.
 | `APP_DEBUG` | `true` | Set to `false` in production |
 | `APP_ENV` | `local` | Set to `production` in production |
 | `REGISTRATION_ENABLED` | `true` | Set to `false` to disable public user registration |
+| `ACCOUNT_MANAGEMENT_ENABLED` | `true` | Set to `false` to prevent users from adding or removing tracked accounts |
 
 ### SSL / Domain
 
@@ -538,6 +539,22 @@ docker compose up -d --build app worker
 
 The `/register` route will return a 404. Login, password reset, and all other features continue to work normally.
 
+### Locking Account Management
+
+Once your tracked accounts are set up, you can prevent users from adding or removing accounts. Add this to your `.env`:
+
+```env
+ACCOUNT_MANAGEMENT_ENABLED=false
+```
+
+Rebuild to apply:
+
+```bash
+docker compose up -d --build app web
+```
+
+The Add Account and Remove buttons will disappear from the UI. Direct calls to the create/store/destroy routes will return a 403. Viewing accounts, browsing stats, and pausing/resuming tracking continue to work normally.
+
 ### Creating Users from the Command Line
 
 If registration is disabled (or you simply prefer not to use the web form), you can create users via the command line:
@@ -579,4 +596,5 @@ The `tests/` directory is excluded from Docker images (via `.dockerignore`) to k
 
 ## License
 
-This project is private software. All rights reserved.
+This project is licensed under the [MIT License](LICENSE).
+
